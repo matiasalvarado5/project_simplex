@@ -17,8 +17,8 @@ El objetivo es brindar una herramienta intuitiva para que usuarios no expertos p
 Se utilizará una metodología **Ágil (Scrum)** con iteraciones cortas (**Sprints**) para entregar incrementos funcionales del sistema.  
 
 - **Product Owner:** Profesor  
-- **Scrum Master:** [tu nombre o un compañero]  
-- **Equipo de desarrollo:**
+- **Scrum Master:** Alvarado Matías
+##  Equipo de desarrollo
 - Alvarado Matías
 - Díaz Bellomo Emiliano Agustín
 - Marín Franco
