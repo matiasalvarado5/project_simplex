@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Método Simplex</title>
+</head>
+<body>
+    <h1>Resolver con Simplex</h1>
+
+    <form action="/solve" method="POST">
+        <p><b>Función objetivo</b>: (en proceso, de momento hardcodeada)</p>
+        <button type="submit">Resolver</button>
+    </form>
+
+    <hr>
+
+    {{ if .resultado }}
+        <h2>Resultado:</h2>
+        <p>Valor óptimo: {{ .resultado.Value }}</p>
+        <p>Variables: {{ range $i, $x := .resultado.X }}
+            x{{ $i }} = {{ $x }}<br>
+        {{ end }}</p>
+        <p>Estado: {{ .resultado.Status }}</p>
+    {{ end }}
+
+    {{ if .error }}
+        <h2 style="color:red;">Error: {{ .error }}</h2>
+    {{ end }}
+</body>
+</html>
