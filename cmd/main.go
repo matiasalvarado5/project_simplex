@@ -4,16 +4,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gonum.org/v1/gonum/mat"
-
 	"github.com/matiasalvarado5/simplex-go/services"
+	"gonum.org/v1/gonum/mat"
 )
 
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("../templates/*")
 
-	// Página principal
+	//ruta de prueba mediante un json
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "home.html", nil)
 	})
@@ -40,6 +39,5 @@ func main() {
 			"resultado": result,
 		})
 	})
-
 	router.Run(":8080")
 }

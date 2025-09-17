@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Simplex Solver</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 150px; }
+    button { margin-top: 10px; padding: 10px 20px; cursor: pointer; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Método Simplex (Frontend básico)</h2>
+
+  <p>Ingresá tu problema en formato JSON:</p>
+  <textarea id="inputJson">{
+  "A": [
+    [2, 1],
+    [1, 2],
+    [1, -1]
+  ],
+  "b": [20, 20, 10],
+  "c": [10, 12],
+  "maximize": true
+}</textarea>
+  <br>
+  <button onclick="solve()">Resolver</button>
+
+  <h3>Resultado:</h3>
+  <pre id="output"></pre>
+
+  <script>
+    async function solve() {
+      const input = document.getElementById("inputJson").value;
+      try {
+        const response = await fetch("http://localhost:8080/solve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: input
+        });
+        const data = await response.json();
+        document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("output").textContent = "Error: " + err;
+      }
+    }
+  </script>
+</body>
+</html>
