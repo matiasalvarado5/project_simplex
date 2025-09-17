@@ -48,6 +48,8 @@ Se utilizará una metodología **Ágil (Scrum)** con iteraciones cortas (**Sprin
 4. **Como usuario**, quiero exportar los resultados a PDF, **para** guardarlos y compartirlos fácilmente.  
 5. **Como usuario**, quiero que el sistema valide mis entradas, **para** evitar errores con datos inconsistentes.  
 
+
+
 ---
 
 
