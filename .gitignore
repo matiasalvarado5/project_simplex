@@ -1,0 +1,14 @@
+# Binaries
+/bin/
+/obj/
+*.exe
+*.test
+
+# Go modules
+vendor/
+
+# VSCode
+.vscode/
+
+# Otros
+*.log
