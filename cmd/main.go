@@ -20,8 +20,21 @@ type SimplexRequest struct {
 func main() {
 	router := gin.Default()
 
-	// 🔓 Middleware para habilitar CORS
-	router.Use(func(c *gin.Context) {
+	//Middleware
+	router.Use(corsMiddleware())
+
+	//Templates
+	router.LoadHTMLGlob("templates/*")
+
+	// Rutas
+	registerRoutes(router)
+
+	// Servidor
+	router.Run(":8080")
+}
+
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
@@ -30,41 +43,35 @@ func main() {
 			return
 		}
 		c.Next()
-	})
+	}
+}
 
-	// Ruta de prueba
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "hola esta es la aplicacion web del metodo simplex",
+func registerRoutes(r *gin.Engine) {
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "Metodo Simplex",
 		})
 	})
+	r.POST("/solve", solveSimplexHandler)
+}
 
-	// Nueva ruta para resolver simplex
-	router.POST("/solve", func(c *gin.Context) {
-		var req SimplexRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+func solveSimplexHandler(c *gin.Context) {
+	var req SimplexRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	m, n := len(req.A), len(req.A[0])
+	data := make([]float64, 0, m*n)
+	for i := 0; i < m; i++ {
+		data = append(data, req.A[i]...)
+	}
+	A := mat.NewDense(m, n, data)
 
-		// Convertir [][]float64 en *mat.Dense
-		m, n := len(req.A), len(req.A[0])
-		data := make([]float64, 0, m*n)
-		for i := 0; i < m; i++ {
-			data = append(data, req.A[i]...)
-		}
-		A := mat.NewDense(m, n, data)
-
-		// Resolver
-		result, err := services.SolveSimplex(A, req.B, req.C, req.Maximize)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, result)
-	})
-
-	// Levantar servidor en puerto 8080
-	router.Run(":8080")
+	result, err := services.SolveSimplex(A, req.B, req.C, req.Maximize)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
