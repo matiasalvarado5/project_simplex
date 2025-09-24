@@ -58,3 +58,28 @@ func TestSolveSimplexMaximization(t *testing.T) {
 		t.Errorf("valor optimo esperado 10, obtenido %.6f", result.Value)
 	}
 }
+
+func TestSolveSimplexMinimization(t *testing.T) {
+	// Minimizar:
+	//     Z = x1 + x2
+	// Restricciones:
+	//     x1 + 2x2 >= 4
+	//     x1 + x2 >= 2
+	// Resultado esperado: solución óptima factible
+
+	A := mat.NewDense(2, 2, []float64{
+		1, 2,
+		1, 1,
+	})
+	b := []float64{4, 2}
+	c := []float64{1, 1}
+
+	result, err := services.SolveSimplex(A, b, c, false) // false = minimización
+
+	if err != nil {
+		t.Fatalf("Error en simplex minimización: %v", err)
+	}
+	if result.Status != "Optimo" {
+		t.Fatalf("Se esperaba solución óptima, se obtuvo %v", result.Status)
+	}
+}
