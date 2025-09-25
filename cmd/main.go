@@ -4,18 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gonum.org/v1/gonum/mat"
 
 	"github.com/matiasalvarado5/simplex-go/services"
 )
-
-// Estructura para recibir los datos del problema
-type SimplexRequest struct {
-	A        [][]float64 `json:"A"`        // Matriz de restricciones
-	B        []float64   `json:"b"`        // Lado derecho
-	C        []float64   `json:"c"`        // Coeficientes de la función objetivo
-	Maximize bool        `json:"maximize"` // true = maximización
-}
 
 func main() {
 	router := gin.Default()
@@ -56,19 +47,12 @@ func registerRoutes(r *gin.Engine) {
 }
 
 func solveSimplexHandler(c *gin.Context) {
-	var req SimplexRequest
+	var req services.SimplexRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	m, n := len(req.A), len(req.A[0])
-	data := make([]float64, 0, m*n)
-	for i := 0; i < m; i++ {
-		data = append(data, req.A[i]...)
-	}
-	A := mat.NewDense(m, n, data)
-
-	result, err := services.SolveSimplex(A, req.B, req.C, req.Maximize)
+	result, err := services.SolveSimplex(req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
