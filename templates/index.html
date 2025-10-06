@@ -3,48 +3,226 @@
 <head>
   <meta charset="UTF-8">
   <title>Simplex Solver</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    textarea { width: 100%; height: 150px; }
-    button { margin-top: 10px; padding: 10px 20px; cursor: pointer; }
-    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+    body { font-family: Arial, Helvetica, sans-serif; padding: 20px; max-width:1100px; margin:0 auto; }
+    h2 { margin-bottom: 8px; }
+    .row { display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+    label { display:flex; flex-direction:column; font-size:0.95rem; }
+    input[type="number"], input[type="text"], select { padding:6px 8px; border:1px solid #ccc; border-radius:4px; min-width:90px; }
+    .btn { padding:8px 12px; border:none; background:#1976d2; color:white; border-radius:6px; cursor:pointer; }
+    .btn.secondary { background:#6c757d; }
+    .box { border:1px solid #e0e0e0; padding:12px; border-radius:6px; margin-top:12px; }
+    .table-like { border:1px solid #ddd; padding:8px; margin-top:8px; border-radius:6px; }
+    .flex-wrap { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .error { color:#b00020; margin-top:8px; }
+    pre { background:#f7f7f7; padding:8px; border-radius:6px; overflow:auto; }
+    small { color:#555; }
   </style>
 </head>
 <body>
-  <h2>Método Simplex (Frontend básico)</h2>
+  <h2>Método Simplex</h2>
+  <p><small>Generá el formulario, completá coeficientes y enviá al solver.</small></p>
 
-  <p>Ingresá tu problema en formato JSON:</p>
-  <textarea id="inputJson">{
-  "A": [
-    [2, 1],
-    [1, 2],
-    [1, -1]
-  ],
-  "b": [20, 20, 10],
-  "c": [10, 12],
-  "maximize": true
-}</textarea>
-  <br>
-  <button onclick="solve()">Resolver</button>
+  <div class="box">
+    <div class="row">
+      <label>Tipo
+        <select id="tipo">
+          <option value="max">Maximizar</option>
+          <option value="min">Minimizar</option>
+        </select>
+      </label>
 
-  <h3>Resultado:</h3>
-  <pre id="output"></pre>
+      <label>Cant. variables (n)
+        <input id="nVars" type="number" min="1" value="2">
+      </label>
 
-  <script>
-    async function solve() {
-      const input = document.getElementById("inputJson").value;
-      try {
-        const response = await fetch("http://localhost:8080/solve", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: input
-        });
-        const data = await response.json();
-        document.getElementById("output").textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        document.getElementById("output").textContent = "Error: " + err;
-      }
+      <label>Cant. restricciones (m)
+        <input id="nRest" type="number" min="1" value="2">
+      </label>
+
+      <button id="generateBtn" class="btn">Generar formulario</button>
+      <button id="clearBtn" class="btn secondary" type="button">Limpiar</button>
+    </div>
+
+    <form id="simplexForm" onsubmit="return false;">
+      <div id="dynamicArea"></div>
+
+      <div style="margin-top:12px;">
+        <button id="submitBtn" class="btn" type="button">Resolver</button>
+      </div>
+    </form>
+
+    <div id="messages" class="error" role="status" aria-live="polite"></div>
+  </div>
+
+  <div id="resultArea" class="box" style="display:none;">
+    <h3>Resultado</h3>
+    <div id="resultContent"></div>
+    <button id="backBtn" class="btn secondary" style="margin-top:10px;">Volver</button>
+  </div>
+
+<script>
+/* --- Helpers --- */
+function isNumberString(s){ return /^[-+]?\d*(\.\d+)?$/.test((s||'').toString().trim()); }
+
+/* --- Generadores dinámicos --- */
+function makeObjective(n, existing){
+  const cont = document.createElement('div');
+  cont.innerHTML = '<h4>Función objetivo (coeficientes c)</h4>';
+  const flex = document.createElement('div'); flex.className = 'flex-wrap';
+  for(let i=0;i<n;i++){
+    const val = existing && existing.c && existing.c[i] !== undefined ? existing.c[i] : '';
+    const lbl = document.createElement('label');
+    lbl.innerHTML = `c${i+1}<input name="c_${i}" type="text" inputmode="decimal" value="${val}" required />`;
+    flex.appendChild(lbl);
+  }
+  cont.appendChild(flex);
+  return cont;
+}
+
+function makeConstraints(m, n, existing){
+  const cont = document.createElement('div');
+  cont.innerHTML = '<h4>Restricciones</h4>';
+  for(let r=0;r<m;r++){
+    const box = document.createElement('div');
+    box.className = 'table-like';
+    box.innerHTML = `<strong>Restricción ${r+1}</strong>`;
+    const row = document.createElement('div'); row.className = 'flex-wrap';
+    for(let j=0;j<n;j++){
+      const val = existing && existing.A && existing.A[r] && existing.A[r][j] !== undefined ? existing.A[r][j] : '';
+      const lbl = document.createElement('label');
+      lbl.innerHTML = `a[${r+1},${j+1}]<input name="a_${r}_${j}" type="text" inputmode="decimal" value="${val}" required />`;
+      row.appendChild(lbl);
     }
-  </script>
+    const existingSign = existing && existing.signs && existing.signs[r] ? existing.signs[r] : '<=';
+    const signSel = document.createElement('label');
+    signSel.innerHTML = `Relación
+      <select name="sign_${r}">
+        <option value="<=" ${existingSign=='<='?'selected':''}>&le;</option>
+        <option value="=" ${existingSign=='='?'selected':''}>=</option>
+        <option value=">=" ${existingSign=='>='?'selected':''}>&ge;</option>
+      </select>`;
+    row.appendChild(signSel);
+
+    const valb = existing && existing.B && existing.B[r] !== undefined ? existing.B[r] : '';
+    const rhs = document.createElement('label');
+    rhs.innerHTML = `b${r+1}<input name="b_${r}" type="text" inputmode="decimal" value="${valb}" required />`;
+    row.appendChild(rhs);
+
+    box.appendChild(row);
+    cont.appendChild(box);
+  }
+  return cont;
+}
+
+/* --- Form generation & collection --- */
+function generateForm(existing){
+  const n = parseInt(document.getElementById('nVars').value) || 0;
+  const m = parseInt(document.getElementById('nRest').value) || 0;
+  const area = document.getElementById('dynamicArea');
+  const messages = document.getElementById('messages');
+  area.innerHTML = ''; messages.textContent = '';
+
+  if(n <= 0 || m <= 0){ messages.textContent = 'n y m deben ser enteros mayores que 0.'; return; }
+  area.appendChild(makeObjective(n, existing));
+  area.appendChild(makeConstraints(m, n, existing));
+}
+
+function collectForm(){
+  const messagesEl = document.getElementById('messages'); messagesEl.textContent = '';
+  const n = parseInt(document.getElementById('nVars').value) || 0;
+  const m = parseInt(document.getElementById('nRest').value) || 0;
+  const tipo = document.getElementById('tipo').value;
+  const c = [], A = [], b = [], signs = [];
+
+  for(let i=0;i<n;i++){
+    const v = document.querySelector(`[name="c_${i}"]`).value;
+    if(v.trim()===''){ messagesEl.textContent = `Complete c${i+1}`; return null; }
+    if(!isNumberString(v)){ messagesEl.textContent = `c${i+1} debe ser numérico`; return null; }
+    c.push(parseFloat(v));
+  }
+
+  for(let r=0;r<m;r++){
+    const row = [];
+    for(let j=0;j<n;j++){
+      const sel = document.querySelector(`[name="a_${r}_${j}"]`);
+      if(!sel){ messagesEl.textContent = `Falta a[${r+1},${j+1}]`; return null; }
+      const val = sel.value;
+      if(val.trim()===''){ messagesEl.textContent = `Complete a[${r+1},${j+1}]`; return null; }
+      if(!isNumberString(val)){ messagesEl.textContent = `a[${r+1},${j+1}] debe ser numérico`; return null; }
+      row.push(parseFloat(val));
+    }
+    A.push(row);
+
+    const s = document.querySelector(`[name="sign_${r}"]`).value;
+    signs.push(s);
+
+    const vb = document.querySelector(`[name="b_${r}"]`).value;
+    if(vb.trim()===''){ messagesEl.textContent = `Complete b${r+1}`; return null; }
+    if(!isNumberString(vb)){ messagesEl.textContent = `b${r+1} debe ser numérico`; return null; }
+    b.push(parseFloat(vb));
+  }
+
+  return { c, A, b, signs, maximize: tipo === 'max' };
+}
+
+/* --- Submit --- */
+async function submitForm(){
+  const data = collectForm(); if(!data) return;
+  const messagesEl = document.getElementById('messages'); messagesEl.textContent = 'Resolviendo...';
+
+  try {
+    const res = await fetch('/solve', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        A: data.A, b: data.b, signs: data.signs, c: data.c, maximize: data.maximize
+      })
+    });
+    if(!res.ok){
+      const err = await res.json().catch(()=>({error: 'Error servidor'}));
+      messagesEl.textContent = err.error || 'Error en el servidor';
+      return;
+    }
+    const json = await res.json();
+    showResult(json);
+  } catch(e){
+    messagesEl.textContent = 'Error al comunicarse: ' + e.message;
+  }
+}
+
+/* --- Mostrar resultado --- */
+function showResult(res){
+  const area = document.getElementById('resultArea');
+  const content = document.getElementById('resultContent');
+  area.style.display = 'block';
+  const parts = [];
+  if(res.status) parts.push(`<p><strong>Estado:</strong> ${res.status}</p>`);
+  if(res.value!==undefined) parts.push(`<p><strong>Z:</strong> ${res.value}</p>`);
+  if(res.x && Array.isArray(res.x)){
+    parts.push('<table border="1" cellpadding="6" cellspacing="0"><tr><th>Variable</th><th>Valor</th></tr>');
+    res.x.forEach((v,i)=>{ parts.push(`<tr><td>x${i+1}</td><td>${Number(v).toPrecision(6)}</td></tr>`); });
+    parts.push('</table>');
+  } else {
+    parts.push('<pre>' + JSON.stringify(res, null, 2) + '</pre>');
+  }
+  content.innerHTML = parts.join('');
+  document.getElementById('messages').textContent = '';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* --- Botones --- */
+document.getElementById('generateBtn').addEventListener('click', ()=>generateForm());
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  document.getElementById('dynamicArea').innerHTML = '';
+  document.getElementById('messages').textContent = '';
+});
+document.getElementById('submitBtn').addEventListener('click', submitForm);
+document.getElementById('backBtn').addEventListener('click', ()=>{ document.getElementById('resultArea').style.display='none'; });
+
+/* --- Auto-generación --- */
+window.addEventListener('load', ()=> generateForm());
+</script>
 </body>
 </html>
