@@ -5,24 +5,213 @@
   <title>Simplex Solver</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; padding: 20px; max-width:1100px; margin:0 auto; }
-    h2 { margin-bottom: 8px; }
-    .row { display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
-    label { display:flex; flex-direction:column; font-size:0.95rem; }
-    input[type="number"], input[type="text"], select { padding:6px 8px; border:1px solid #ccc; border-radius:4px; min-width:90px; }
-    .btn { padding:8px 12px; border:none; background:#1976d2; color:white; border-radius:6px; cursor:pointer; }
-    .btn.secondary { background:#6c757d; }
-    .box { border:1px solid #e0e0e0; padding:12px; border-radius:6px; margin-top:12px; }
-    .table-like { border:1px solid #ddd; padding:8px; margin-top:8px; border-radius:6px; }
-    .flex-wrap { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-    .error { color:#b00020; margin-top:8px; }
-    pre { background:#f7f7f7; padding:8px; border-radius:6px; overflow:auto; }
-    small { color:#555; }
+    /* Variables de Color (¡NUEVA PALETA: ROJO, AZUL VIVO, BLANCO!) */
+    :root {
+      --primary: #DC3545; /* ROJO VIBRANTE (Bootstrap 'danger') */
+      --primary-light: #E96671; /* Rojo más claro para hover */
+      --secondary: #00BFFF; /* AZUL CÓSMICO (azul súper vivo, 'Deep Sky Blue') */
+      --secondary-dark: #007BFF; /* Azul un poco más oscuro para texto secundario */
+      --bg-color: #FFFFFF; /* Fondo BLANCO PURO */
+      
+      --card-bg: #FFFFFF; /* Fondo de las cajas blanco puro (ya lo era) */
+      --text-color: #212529; /* Gris muy oscuro para alto contraste (Casi negro) */
+      --border-color: #CED4DA; /* Gris claro neutro para bordes base */
+      --error-color: #DC3545; /* Rojo para errores (igual que primary) */
+      --shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra más sutil y limpia */
+    }
+
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      padding: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+      color: var(--text-color);
+      background-color: var(--bg-color); /* Fondo BLANCO PURO */
+    }
+
+    h2 {
+      margin-bottom: 20px; 
+      color: var(--primary); /* Título en ROJO VIBRANTE */
+      text-align: center;
+      font-size: 2em; 
+      border-bottom: none; 
+      padding-bottom: 0;
+    }
+    
+    h3 { color: var(--primary); } /* H3 en ROJO */
+    
+    #dynamicArea h4 { 
+        color: var(--text-color); /* Títulos de sección en NEGRO */
+        margin-top: 20px; 
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
+
+    .row {
+      display: flex;
+      gap: 15px;
+      align-items: flex-end;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-color); /* Label en NEGRO */
+    }
+
+    input[type="number"], input[type="text"], select {
+      padding: 8px 10px;
+      border: 2px solid var(--border-color); /* Grosor AUMENTADO a 2px */
+      border-radius: 6px;
+      min-width: 100px;
+      background-color: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    input:focus, select:focus {
+        border-color: var(--secondary); /* Borde ENFOCADO en AZUL SÚPER VIVO */
+        box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.3); /* Sombra de enfoque AZUL SÚPER VIVO */
+        outline: none;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      background: var(--primary); /* Botones principales en ROJO VIBRANTE */
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s, transform 0.1s;
+      align-self: flex-end;
+    }
+
+    .btn:hover {
+      background: var(--primary-light);
+    }
+    
+    .btn:active {
+        transform: scale(0.98);
+    }
+
+    .btn.secondary {
+      background: var(--secondary); /* Botón secundario en AZUL SÚPER VIVO */
+    }
+    
+    .btn.secondary:hover {
+        background: var(--secondary-dark);
+    }
+
+    .box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .table-like {
+      border: 1px solid var(--border-color);
+      padding: 15px;
+      margin-top: 10px;
+      border-radius: 6px;
+      background-color: #F8F9FA; /* Fondo muy ligero para diferenciar restricciones */
+    }
+
+    .table-like strong {
+        color: var(--primary); /* Título de restricción en ROJO VIBRANTE */
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .flex-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .error {
+      color: var(--error-color); /* Error en ROJO */
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px solid var(--error-color);
+      border-radius: 4px;
+      background-color: #F8D7DA; /* Fondo de error rojo muy claro */
+      font-weight: 500;
+    }
+
+    pre {
+      background: #E9ECEF; /* Gris claro neutro para código */
+      padding: 15px;
+      border-radius: 6px;
+      overflow: auto;
+      border: 1px solid var(--border-color);
+      font-size: 0.9em;
+    }
+
+    /* Estilo para la tabla de resultados */
+    #resultContent table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+    
+    #resultContent th, #resultContent td {
+        border: 1px solid var(--border-color);
+        padding: 10px;
+        text-align: left;
+    }
+    
+    #resultContent th {
+        background-color: var(--primary); /* Encabezado de tabla en ROJO */
+        color: white;
+    }
+    
+    #resultContent tr:nth-child(even) {
+        background-color: #F2F2F2; /* Rayado sutil para tabla */
+    }
+    
+    #resultContent p {
+        font-size: 1.1em;
+        margin-bottom: 8px;
+    }
+    
+    #resultContent strong {
+        color: var(--primary); /* Texto fuerte en ROJO */
+    }
+    
+    /* Estilo para la vista previa del modelo LP */
+    #modelPreview {
+        margin-top: 25px;
+        padding: 15px;
+        border: 2px dashed var(--secondary); /* Borde en AZUL SÚPER VIVO */
+        background: #F0F8FF; /* Fondo muy claro para el preview */
+        border-radius: 8px;
+    }
+    #modelPreview p {
+        font-weight: 500;
+        margin: 0 0 5px 0;
+        color: var(--text-color); /* Texto en NEGRO */
+    }
+    #modelPreview .equation {
+        font-family: monospace;
+        font-size: 1.05em;
+        padding-left: 10px;
+        margin-bottom: 10px;
+        display: block;
+        white-space: pre-wrap;
+    }
+
   </style>
 </head>
 <body>
-  <h2>Método Simplex</h2>
-  <p><small>Generá el formulario, completá coeficientes y enviá al solver.</small></p>
+  <h2>Método Simplex</h2> 
 
   <div class="box">
     <div class="row">
@@ -47,8 +236,10 @@
 
     <form id="simplexForm" onsubmit="return false;">
       <div id="dynamicArea"></div>
+      
+      <!-- Contenedor para la vista previa del modelo matemático --><div id="modelPreview" style="display:none;"></div>
 
-      <div style="margin-top:12px;">
+      <div style="margin-top:15px;">
         <button id="submitBtn" class="btn" type="button">Resolver</button>
       </div>
     </form>
@@ -57,9 +248,9 @@
   </div>
 
   <div id="resultArea" class="box" style="display:none;">
-    <h3>Resultado</h3>
+    <h3>Resultado 🎉</h3>
     <div id="resultContent"></div>
-    <button id="backBtn" class="btn secondary" style="margin-top:10px;">Volver</button>
+    <button id="backBtn" class="btn secondary" style="margin-top:15px;">Volver</button>
   </div>
 
 <script>
@@ -74,7 +265,7 @@ function makeObjective(n, existing){
   for(let i=0;i<n;i++){
     const val = existing && existing.c && existing.c[i] !== undefined ? existing.c[i] : '';
     const lbl = document.createElement('label');
-    lbl.innerHTML = `c${i+1}<input name="c_${i}" type="text" inputmode="decimal" value="${val}" required />`;
+    lbl.innerHTML = `c[${i+1}]<input name="c_${i}" type="text" inputmode="decimal" value="${val}" required class="model-input" />`;
     flex.appendChild(lbl);
   }
   cont.appendChild(flex);
@@ -92,13 +283,14 @@ function makeConstraints(m, n, existing){
     for(let j=0;j<n;j++){
       const val = existing && existing.A && existing.A[r] && existing.A[r][j] !== undefined ? existing.A[r][j] : '';
       const lbl = document.createElement('label');
-      lbl.innerHTML = `a[${r+1},${j+1}]<input name="a_${r}_${j}" type="text" inputmode="decimal" value="${val}" required />`;
+      // Etiqueta restaurada con corchetes y coma: a[1,1], a[1,2], etc.
+      lbl.innerHTML = `a[${r+1},${j+1}]<input name="a_${r}_${j}" type="text" inputmode="decimal" value="${val}" required class="model-input" />`;
       row.appendChild(lbl);
     }
     const existingSign = existing && existing.signs && existing.signs[r] ? existing.signs[r] : '<=';
     const signSel = document.createElement('label');
     signSel.innerHTML = `Relación
-      <select name="sign_${r}">
+      <select name="sign_${r}" class="model-input">
         <option value="<=" ${existingSign=='<='?'selected':''}>&le;</option>
         <option value="=" ${existingSign=='='?'selected':''}>=</option>
         <option value=">=" ${existingSign=='>='?'selected':''}>&ge;</option>
@@ -107,7 +299,7 @@ function makeConstraints(m, n, existing){
 
     const valb = existing && existing.B && existing.B[r] !== undefined ? existing.B[r] : '';
     const rhs = document.createElement('label');
-    rhs.innerHTML = `b${r+1}<input name="b_${r}" type="text" inputmode="decimal" value="${valb}" required />`;
+    rhs.innerHTML = `b[${r+1}]<input name="b_${r}" type="text" inputmode="decimal" value="${valb}" required class="model-input" />`;
     row.appendChild(rhs);
 
     box.appendChild(row);
@@ -123,23 +315,38 @@ function generateForm(existing){
   const area = document.getElementById('dynamicArea');
   const messages = document.getElementById('messages');
   area.innerHTML = ''; messages.textContent = '';
+  document.getElementById('modelPreview').style.display = 'none';
 
   if(n <= 0 || m <= 0){ messages.textContent = 'n y m deben ser enteros mayores que 0.'; return; }
   area.appendChild(makeObjective(n, existing));
   area.appendChild(makeConstraints(m, n, existing));
+  
+  const inputs = document.querySelectorAll('#dynamicArea input, #dynamicArea select');
+  inputs.forEach(input => input.addEventListener('input', throttleUpdate));
+  
+  updateModelDisplay();
 }
 
-function collectForm(){
-  const messagesEl = document.getElementById('messages'); messagesEl.textContent = '';
+/**
+ * Recolecta los datos del formulario, opcionalmente sin mostrar errores.
+ * @param {boolean} silent - Si es true, omite la visualización de mensajes de error.
+ * @returns {object|null} Los datos del problema LP o null si faltan datos.
+ */
+function collectForm(silent = false){
+  const messagesEl = document.getElementById('messages'); 
+  if (!silent) messagesEl.textContent = '';
+  
   const n = parseInt(document.getElementById('nVars').value) || 0;
   const m = parseInt(document.getElementById('nRest').value) || 0;
   const tipo = document.getElementById('tipo').value;
   const c = [], A = [], b = [], signs = [];
 
   for(let i=0;i<n;i++){
-    const v = document.querySelector(`[name="c_${i}"]`).value;
-    if(v.trim()===''){ messagesEl.textContent = `Complete c${i+1}`; return null; }
-    if(!isNumberString(v)){ messagesEl.textContent = `c${i+1} debe ser numérico`; return null; }
+    const el = document.querySelector(`[name="c_${i}"]`);
+    if (!el) return null;
+    const v = el.value;
+    if(v.trim()===''){ if(!silent) messagesEl.textContent = `Complete c[${i+1}]`; return null; }
+    if(!isNumberString(v)){ if(!silent) messagesEl.textContent = `c[${i+1}] debe ser numérico`; return null; }
     c.push(parseFloat(v));
   }
 
@@ -147,29 +354,125 @@ function collectForm(){
     const row = [];
     for(let j=0;j<n;j++){
       const sel = document.querySelector(`[name="a_${r}_${j}"]`);
-      if(!sel){ messagesEl.textContent = `Falta a[${r+1},${j+1}]`; return null; }
+      if(!sel) return null;
       const val = sel.value;
-      if(val.trim()===''){ messagesEl.textContent = `Complete a[${r+1},${j+1}]`; return null; }
-      if(!isNumberString(val)){ messagesEl.textContent = `a[${r+1},${j+1}] debe ser numérico`; return null; }
+      // Mensajes de error con corchetes restaurados
+      if(val.trim()===''){ if(!silent) messagesEl.textContent = `Complete a[${r+1},${j+1}]`; return null; }
+      if(!isNumberString(val)){ if(!silent) messagesEl.textContent = `a[${r+1},${j+1}] debe ser numérico`; return null; }
       row.push(parseFloat(val));
     }
     A.push(row);
 
-    const s = document.querySelector(`[name="sign_${r}"]`).value;
+    const signEl = document.querySelector(`[name="sign_${r}"]`);
+    if (!signEl) return null;
+    const s = signEl.value;
     signs.push(s);
 
-    const vb = document.querySelector(`[name="b_${r}"]`).value;
-    if(vb.trim()===''){ messagesEl.textContent = `Complete b${r+1}`; return null; }
-    if(!isNumberString(vb)){ messagesEl.textContent = `b${r+1} debe ser numérico`; return null; }
+    const vbEl = document.querySelector(`[name="b_${r}"]`);
+    if (!vbEl) return null;
+    const vb = vbEl.value;
+    if(vb.trim()===''){ if(!silent) messagesEl.textContent = `Complete b[${r+1}]`; return null; }
+    if(!isNumberString(vb)){ if(!silent) messagesEl.textContent = `b[${r+1}] debe ser numérico`; return null; }
     b.push(parseFloat(vb));
   }
 
   return { c, A, b, signs, maximize: tipo === 'max' };
 }
 
+/* --- Lógica de Visualización del Modelo LP --- */
+
+function formatLP(data) {
+  if (!data || data.c.length === 0) {
+    return 'Esperando coeficientes para mostrar el modelo...';
+  }
+
+  const varNames = Array.from({ length: data.c.length }, (_, i) => `x${i + 1}`);
+  const type = data.maximize ? 'Maximizar' : 'Minimizar';
+
+  const objTerms = data.c.map((c, i) => {
+    const val = Number(c).toPrecision(4); 
+    const cFloat = parseFloat(val);
+
+    if (cFloat === 0) return '';
+    
+    const sign = cFloat > 0 ? '+' : '-';
+    const absC = Math.abs(cFloat);
+    const coeff = absC === 1 ? '' : absC.toString();
+    
+    return `${sign} ${coeff}${varNames[i]}`;
+  }).filter(t => t !== '');
+
+  let objective = objTerms.join(' ').trim();
+  if (objective.startsWith('+')) {
+    objective = objective.substring(1).trim();
+  }
+  if (objective === '') {
+      objective = '0';
+  }
+
+  const constraints = data.A.map((row, r) => {
+    const constTerms = row.map((a, i) => {
+      const val = Number(a).toPrecision(4);
+      const aFloat = parseFloat(val);
+      
+      if (aFloat === 0) return '';
+      
+      const sign = aFloat > 0 ? '+' : '-';
+      const absA = Math.abs(aFloat);
+      const coeff = absA === 1 ? '' : absA.toString();
+      
+      return `${sign} ${coeff}${varNames[i]}`;
+    }).filter(t => t !== '');
+    
+    let constString = constTerms.join(' ').trim();
+    if (constString.startsWith('+')) {
+      constString = constString.substring(1).trim();
+    }
+    
+    const signHtml = data.signs[r] === '<=' ? '&le;' : data.signs[r] === '>=' ? '&ge;' : '=';
+    const bValue = Number(data.b[r]).toPrecision(4);
+    
+    return `<span class="equation">${constString} ${signHtml} ${bValue}</span>`;
+  }).join('');
+  
+  const nonNegativity = varNames.join(', ') + ' &ge; 0';
+
+  return `
+    <p><strong>Problema de Programación Lineal:</strong></p>
+    <p style="margin-top: 10px;">${type} Z:</p>
+    <span class="equation">Z = ${objective}</span>
+    <p style="margin-top: 15px;">Sujeto a:</p>
+    <div style="padding-left: 10px;">${constraints}</div>
+    <p style="margin-top: 15px;">Restricción de no negatividad:</p>
+    <span class="equation">${nonNegativity}</span>
+  `;
+}
+
+let updateTimeout = null;
+function updateModelDisplay() {
+  const data = collectForm(true); 
+  const previewEl = document.getElementById('modelPreview');
+  
+  const n = parseInt(document.getElementById('nVars').value) || 0;
+  const m = parseInt(document.getElementById('nRest').value) || 0;
+
+  if (n > 0 && m > 0) {
+    previewEl.innerHTML = formatLP(data);
+    previewEl.style.display = 'block';
+  } else {
+    previewEl.style.display = 'none';
+  }
+}
+
+function throttleUpdate() {
+    clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(updateModelDisplay, 200);
+}
+
 /* --- Submit --- */
 async function submitForm(){
-  const data = collectForm(); if(!data) return;
+  const data = collectForm(false); 
+  if(!data) return;
   const messagesEl = document.getElementById('messages'); messagesEl.textContent = 'Resolviendo...';
 
   try {
@@ -201,9 +504,9 @@ function showResult(res){
   if(res.status) parts.push(`<p><strong>Estado:</strong> ${res.status}</p>`);
   if(res.value!==undefined) parts.push(`<p><strong>Z:</strong> ${res.value}</p>`);
   if(res.x && Array.isArray(res.x)){
-    parts.push('<table border="1" cellpadding="6" cellspacing="0"><tr><th>Variable</th><th>Valor</th></tr>');
+    parts.push('<table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Variable</th><th>Valor</th></tr></thead><tbody>');
     res.x.forEach((v,i)=>{ parts.push(`<tr><td>x${i+1}</td><td>${Number(v).toPrecision(6)}</td></tr>`); });
-    parts.push('</table>');
+    parts.push('</tbody></table>');
   } else {
     parts.push('<pre>' + JSON.stringify(res, null, 2) + '</pre>');
   }
@@ -216,6 +519,7 @@ function showResult(res){
 document.getElementById('generateBtn').addEventListener('click', ()=>generateForm());
 document.getElementById('clearBtn').addEventListener('click', ()=>{
   document.getElementById('dynamicArea').innerHTML = '';
+  document.getElementById('modelPreview').style.display = 'none';
   document.getElementById('messages').textContent = '';
 });
 document.getElementById('submitBtn').addEventListener('click', submitForm);
