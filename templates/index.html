@@ -268,15 +268,32 @@ function isNumberString(s){ return /^[-+]?\d*(\.\d+)?$/.test((s||'').toString().
 
 function makeObjective(n, existing){
   const cont = document.createElement('div');
-  cont.innerHTML = '<h4>Función objetivo (coeficientes c)</h4>';
+  cont.innerHTML = '<h4>Función objetivo</h4>'; 
+  
+  const box = document.createElement('div');
+  box.className = 'table-like';
+  box.innerHTML = '<strong>Coeficientes de Z</strong>'; 
+  
   const flex = document.createElement('div'); flex.className = 'flex-wrap';
+  
   for(let i=0;i<n;i++){
     const val = existing && existing.c && existing.c[i] !== undefined ? existing.c[i] : '';
     const lbl = document.createElement('label');
-    lbl.innerHTML = `c[${i+1}]<input name="c_${i}" type="text" inputmode="decimal" value="${val}" required class="model-input" />`;
+    
+    const varName = `x${i+1}`; 
+    lbl.className = 'coeff-label';
+    lbl.innerHTML = `${varName}<input name="c_${i}" type="text" inputmode="decimal" value="${val}" required class="model-input" />`;
     flex.appendChild(lbl);
+    
+    if (i < n - 1) {
+        const plusSign = document.createElement('span');
+        plusSign.textContent = '+';
+        plusSign.className = 'plus-separator'; 
+        flex.appendChild(plusSign);
+    }
   }
-  cont.appendChild(flex);
+  box.appendChild(flex);
+  cont.appendChild(box);
   return cont;
 }
 
@@ -450,7 +467,6 @@ function formatLP(data) {
 
   return `
     <p style="font-size: 1.2em; margin-bottom: 10px; color: var(--secondary-dark);"><strong>Modelo Matemático (Preview)</strong></p>
-    <p><strong>Problema de Programación Lineal:</strong></p>
     <p style="margin-top: 10px;">${type} Z:</p>
     <span class="equation">Z = ${objective}</span>
     <p style="margin-top: 15px;">Sujeto a (Restricciones):</p>
