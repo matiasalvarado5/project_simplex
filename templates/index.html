@@ -5,19 +5,18 @@
   <title>Simplex Solver</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    /* Variables de Color (¡NUEVA PALETA: ROJO, AZUL VIVO, BLANCO!) */
     :root {
-      --primary: #DC3545; /* ROJO VIBRANTE (Bootstrap 'danger') */
-      --primary-light: #E96671; /* Rojo más claro para hover */
-      --secondary: #00BFFF; /* AZUL CÓSMICO (azul súper vivo, 'Deep Sky Blue') */
-      --secondary-dark: #007BFF; /* Azul un poco más oscuro para texto secundario */
-      --bg-color: #FFFFFF; /* Fondo BLANCO PURO */
+      --primary: #DC3545;
+      --primary-light: #E96671;
+      --secondary: #00BFFF;
+      --secondary-dark: #007BFF;
+      --bg-color: #FFFFFF;
       
-      --card-bg: #FFFFFF; /* Fondo de las cajas blanco puro (ya lo era) */
-      --text-color: #212529; /* Gris muy oscuro para alto contraste (Casi negro) */
-      --border-color: #CED4DA; /* Gris claro neutro para bordes base */
-      --error-color: #DC3545; /* Rojo para errores (igual que primary) */
-      --shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra más sutil y limpia */
+      --card-bg: #FFFFFF;
+      --text-color: #212529;
+      --border-color: #CED4DA;
+      --error-color: #DC3545;
+      --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     body {
@@ -26,22 +25,22 @@
       max-width: 1100px;
       margin: 0 auto;
       color: var(--text-color);
-      background-color: var(--bg-color); /* Fondo BLANCO PURO */
+      background-color: var(--bg-color);
     }
 
     h2 {
       margin-bottom: 20px; 
-      color: var(--primary); /* Título en ROJO VIBRANTE */
+      color: var(--primary);
       text-align: center;
       font-size: 2em; 
       border-bottom: none; 
       padding-bottom: 0;
     }
     
-    h3 { color: var(--primary); } /* H3 en ROJO */
+    h3 { color: var(--primary); }
     
     #dynamicArea h4 { 
-        color: var(--text-color); /* Títulos de sección en NEGRO */
+        color: var(--text-color);
         margin-top: 20px; 
         margin-bottom: 10px;
         font-weight: 500;
@@ -60,12 +59,16 @@
       flex-direction: column;
       font-size: 0.9rem;
       font-weight: 500;
-      color: var(--text-color); /* Label en NEGRO */
+      color: var(--text-color);
+    }
+    
+    label.coeff-label {
+        align-items: center;
     }
 
     input[type="number"], input[type="text"], select {
       padding: 8px 10px;
-      border: 2px solid var(--border-color); /* Grosor AUMENTADO a 2px */
+      border: 2px solid var(--border-color);
       border-radius: 6px;
       min-width: 100px;
       background-color: #fff;
@@ -73,15 +76,15 @@
     }
     
     input:focus, select:focus {
-        border-color: var(--secondary); /* Borde ENFOCADO en AZUL SÚPER VIVO */
-        box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.3); /* Sombra de enfoque AZUL SÚPER VIVO */
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.3);
         outline: none;
     }
 
     .btn {
       padding: 10px 18px;
       border: none;
-      background: var(--primary); /* Botones principales en ROJO VIBRANTE */
+      background: var(--primary);
       color: white;
       border-radius: 6px;
       cursor: pointer;
@@ -99,7 +102,7 @@
     }
 
     .btn.secondary {
-      background: var(--secondary); /* Botón secundario en AZUL SÚPER VIVO */
+      background: var(--secondary);
     }
     
     .btn.secondary:hover {
@@ -120,11 +123,11 @@
       padding: 15px;
       margin-top: 10px;
       border-radius: 6px;
-      background-color: #F8F9FA; /* Fondo muy ligero para diferenciar restricciones */
+      background-color: #F8F9FA;
     }
 
     .table-like strong {
-        color: var(--primary); /* Título de restricción en ROJO VIBRANTE */
+        color: var(--primary);
         display: block;
         margin-bottom: 8px;
     }
@@ -136,18 +139,27 @@
       align-items: center;
     }
 
+    .plus-separator {
+        margin: 0 5px;
+        font-weight: 500;
+        font-size: 1.0rem;
+        color: var(--text-color);
+        align-self: flex-end;
+        margin-bottom: 5px;
+    }
+
     .error {
-      color: var(--error-color); /* Error en ROJO */
+      color: var(--error-color);
       margin-top: 15px;
       padding: 10px;
       border: 1px solid var(--error-color);
       border-radius: 4px;
-      background-color: #F8D7DA; /* Fondo de error rojo muy claro */
+      background-color: #F8D7DA;
       font-weight: 500;
     }
 
     pre {
-      background: #E9ECEF; /* Gris claro neutro para código */
+      background: #E9ECEF;
       padding: 15px;
       border-radius: 6px;
       overflow: auto;
@@ -155,7 +167,6 @@
       font-size: 0.9em;
     }
 
-    /* Estilo para la tabla de resultados */
     #resultContent table {
         width: 100%;
         border-collapse: collapse;
@@ -169,12 +180,12 @@
     }
     
     #resultContent th {
-        background-color: var(--primary); /* Encabezado de tabla en ROJO */
+        background-color: var(--primary);
         color: white;
     }
     
     #resultContent tr:nth-child(even) {
-        background-color: #F2F2F2; /* Rayado sutil para tabla */
+        background-color: #F2F2F2;
     }
     
     #resultContent p {
@@ -183,21 +194,20 @@
     }
     
     #resultContent strong {
-        color: var(--primary); /* Texto fuerte en ROJO */
+        color: var(--primary);
     }
     
-    /* Estilo para la vista previa del modelo LP */
     #modelPreview {
         margin-top: 25px;
         padding: 15px;
-        border: 2px dashed var(--secondary); /* Borde en AZUL SÚPER VIVO */
-        background: #F0F8FF; /* Fondo muy claro para el preview */
+        border: 2px dashed var(--secondary);
+        background: #F0F8FF;
         border-radius: 8px;
     }
     #modelPreview p {
         font-weight: 500;
         margin: 0 0 5px 0;
-        color: var(--text-color); /* Texto en NEGRO */
+        color: var(--text-color);
     }
     #modelPreview .equation {
         font-family: monospace;
@@ -237,7 +247,7 @@
     <form id="simplexForm" onsubmit="return false;">
       <div id="dynamicArea"></div>
       
-      <!-- Contenedor para la vista previa del modelo matemático --><div id="modelPreview" style="display:none;"></div>
+      <div id="modelPreview" style="display:none;"></div>
 
       <div style="margin-top:15px;">
         <button id="submitBtn" class="btn" type="button">Resolver</button>
@@ -254,10 +264,8 @@
   </div>
 
 <script>
-/* --- Helpers --- */
 function isNumberString(s){ return /^[-+]?\d*(\.\d+)?$/.test((s||'').toString().trim()); }
 
-/* --- Generadores dinámicos --- */
 function makeObjective(n, existing){
   const cont = document.createElement('div');
   cont.innerHTML = '<h4>Función objetivo (coeficientes c)</h4>';
@@ -280,13 +288,24 @@ function makeConstraints(m, n, existing){
     box.className = 'table-like';
     box.innerHTML = `<strong>Restricción ${r+1}</strong>`;
     const row = document.createElement('div'); row.className = 'flex-wrap';
+    
     for(let j=0;j<n;j++){
       const val = existing && existing.A && existing.A[r] && existing.A[r][j] !== undefined ? existing.A[r][j] : '';
       const lbl = document.createElement('label');
-      // Etiqueta restaurada con corchetes y coma: a[1,1], a[1,2], etc.
-      lbl.innerHTML = `a[${r+1},${j+1}]<input name="a_${r}_${j}" type="text" inputmode="decimal" value="${val}" required class="model-input" />`;
+      
+      const varName = `x${j+1}`; 
+      lbl.className = 'coeff-label';
+      lbl.innerHTML = `${varName}<input name="a_${r}_${j}" type="text" inputmode="decimal" value="${val}" required class="model-input" />`;
       row.appendChild(lbl);
+
+      if (j < n - 1) {
+          const plusSign = document.createElement('span');
+          plusSign.textContent = '+';
+          plusSign.className = 'plus-separator'; 
+          row.appendChild(plusSign);
+      }
     }
+    
     const existingSign = existing && existing.signs && existing.signs[r] ? existing.signs[r] : '<=';
     const signSel = document.createElement('label');
     signSel.innerHTML = `Relación
@@ -299,7 +318,7 @@ function makeConstraints(m, n, existing){
 
     const valb = existing && existing.B && existing.B[r] !== undefined ? existing.B[r] : '';
     const rhs = document.createElement('label');
-    rhs.innerHTML = `b[${r+1}]<input name="b_${r}" type="text" inputmode="decimal" value="${valb}" required class="model-input" />`;
+    rhs.innerHTML = `Lado derecho (b)<input name="b_${r}" type="text" inputmode="decimal" value="${valb}" required class="model-input" />`;
     row.appendChild(rhs);
 
     box.appendChild(row);
@@ -308,7 +327,6 @@ function makeConstraints(m, n, existing){
   return cont;
 }
 
-/* --- Form generation & collection --- */
 function generateForm(existing){
   const n = parseInt(document.getElementById('nVars').value) || 0;
   const m = parseInt(document.getElementById('nRest').value) || 0;
@@ -327,11 +345,6 @@ function generateForm(existing){
   updateModelDisplay();
 }
 
-/**
- * Recolecta los datos del formulario, opcionalmente sin mostrar errores.
- * @param {boolean} silent - Si es true, omite la visualización de mensajes de error.
- * @returns {object|null} Los datos del problema LP o null si faltan datos.
- */
 function collectForm(silent = false){
   const messagesEl = document.getElementById('messages'); 
   if (!silent) messagesEl.textContent = '';
@@ -345,7 +358,7 @@ function collectForm(silent = false){
     const el = document.querySelector(`[name="c_${i}"]`);
     if (!el) return null;
     const v = el.value;
-    if(v.trim()===''){ if(!silent) messagesEl.textContent = `Complete c[${i+1}]`; return null; }
+    if(v.trim()===''){ if(!silent) messagesEl.textContent = `Complete el coeficiente c[${i+1}]`; return null; }
     if(!isNumberString(v)){ if(!silent) messagesEl.textContent = `c[${i+1}] debe ser numérico`; return null; }
     c.push(parseFloat(v));
   }
@@ -356,9 +369,9 @@ function collectForm(silent = false){
       const sel = document.querySelector(`[name="a_${r}_${j}"]`);
       if(!sel) return null;
       const val = sel.value;
-      // Mensajes de error con corchetes restaurados
-      if(val.trim()===''){ if(!silent) messagesEl.textContent = `Complete a[${r+1},${j+1}]`; return null; }
-      if(!isNumberString(val)){ if(!silent) messagesEl.textContent = `a[${r+1},${j+1}] debe ser numérico`; return null; }
+      const varName = `x${j+1} de la Restricción ${r+1}`;
+      if(val.trim()===''){ if(!silent) messagesEl.textContent = `Complete el coeficiente de ${varName}`; return null; }
+      if(!isNumberString(val)){ if(!silent) messagesEl.textContent = `El coeficiente de ${varName} debe ser numérico`; return null; }
       row.push(parseFloat(val));
     }
     A.push(row);
@@ -371,15 +384,13 @@ function collectForm(silent = false){
     const vbEl = document.querySelector(`[name="b_${r}"]`);
     if (!vbEl) return null;
     const vb = vbEl.value;
-    if(vb.trim()===''){ if(!silent) messagesEl.textContent = `Complete b[${r+1}]`; return null; }
-    if(!isNumberString(vb)){ if(!silent) messagesEl.textContent = `b[${r+1}] debe ser numérico`; return null; }
+    if(vb.trim()===''){ if(!silent) messagesEl.textContent = `Complete el Lado derecho (b) de la Restricción ${r+1}`; return null; }
+    if(!isNumberString(vb)){ if(!silent) messagesEl.textContent = `El Lado derecho (b) debe ser numérico`; return null; }
     b.push(parseFloat(vb));
   }
 
   return { c, A, b, signs, maximize: tipo === 'max' };
 }
-
-/* --- Lógica de Visualización del Modelo LP --- */
 
 function formatLP(data) {
   if (!data || data.c.length === 0) {
@@ -438,10 +449,11 @@ function formatLP(data) {
   const nonNegativity = varNames.join(', ') + ' &ge; 0';
 
   return `
+    <p style="font-size: 1.2em; margin-bottom: 10px; color: var(--secondary-dark);"><strong>Modelo Matemático (Preview)</strong></p>
     <p><strong>Problema de Programación Lineal:</strong></p>
     <p style="margin-top: 10px;">${type} Z:</p>
     <span class="equation">Z = ${objective}</span>
-    <p style="margin-top: 15px;">Sujeto a:</p>
+    <p style="margin-top: 15px;">Sujeto a (Restricciones):</p>
     <div style="padding-left: 10px;">${constraints}</div>
     <p style="margin-top: 15px;">Restricción de no negatividad:</p>
     <span class="equation">${nonNegativity}</span>
@@ -469,7 +481,6 @@ function throttleUpdate() {
     updateTimeout = setTimeout(updateModelDisplay, 200);
 }
 
-/* --- Submit --- */
 async function submitForm(){
   const data = collectForm(false); 
   if(!data) return;
@@ -495,7 +506,6 @@ async function submitForm(){
   }
 }
 
-/* --- Mostrar resultado --- */
 function showResult(res){
   const area = document.getElementById('resultArea');
   const content = document.getElementById('resultContent');
@@ -515,7 +525,6 @@ function showResult(res){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* --- Botones --- */
 document.getElementById('generateBtn').addEventListener('click', ()=>generateForm());
 document.getElementById('clearBtn').addEventListener('click', ()=>{
   document.getElementById('dynamicArea').innerHTML = '';
@@ -525,7 +534,6 @@ document.getElementById('clearBtn').addEventListener('click', ()=>{
 document.getElementById('submitBtn').addEventListener('click', submitForm);
 document.getElementById('backBtn').addEventListener('click', ()=>{ document.getElementById('resultArea').style.display='none'; });
 
-/* --- Auto-generación --- */
 window.addEventListener('load', ()=> generateForm());
 </script>
 </body>
