@@ -4,23 +4,21 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/matiasalvarado5/simplex-go/services"
 )
 
 func main() {
 	router := gin.Default()
 
-	//Middleware
+	// Middleware
 	router.Use(corsMiddleware())
 
-	//Templates
+	router.Static("/static", "./static")
+
 	router.LoadHTMLGlob("templates/*")
 
-	// Rutas
 	registerRoutes(router)
 
-	// Servidor
 	router.Run(":8080")
 }
 
@@ -40,7 +38,7 @@ func corsMiddleware() gin.HandlerFunc {
 func registerRoutes(r *gin.Engine) {
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "Metodo Simplex",
+			"title": "Método Simplex",
 		})
 	})
 	r.POST("/solve", solveSimplexHandler)
@@ -52,10 +50,12 @@ func solveSimplexHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	result, err := services.SolveSimplex(req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, result)
 }

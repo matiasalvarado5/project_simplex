@@ -229,7 +229,7 @@ func simplexCore(tableau *mat.Dense, m, totalVars int, basicVars []int) error {
 			}
 		}
 		if row == -1 {
-			return errors.New("problema no acotado")
+			return errors.New("Problema no acotado")
 		}
 		pivotWithBasis(tableau, row, col, basicVars)
 	}
