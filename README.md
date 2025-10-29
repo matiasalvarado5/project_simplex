@@ -49,7 +49,6 @@ Se utilizará una metodología **Ágil (Scrum)** con iteraciones cortas (**Sprin
 5. **Como usuario**, quiero que el sistema valide mis entradas, **para** evitar errores con datos inconsistentes.  
 
 
-
 ---
 
 
