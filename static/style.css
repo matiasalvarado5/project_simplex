@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css?family=Montserrat:700");
 
 .hero {
-  background-color: #0040C1;
-  position: fixed; 
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #2d3561 100%);
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -28,36 +28,41 @@
   left: 45vw;
   width: 10px;
   height: 10px;
-  border: solid 1px #0051f4;
+  border: solid 1px #818cf8;
   transform-origin: top left;
   transform: scale(0) rotate(0deg) translate(-50%, -50%);
-  animation: cube 12s ease-in forwards infinite;
-  opacity: 0.5; 
+  animation: cube 15s ease-in forwards infinite;
+  opacity: 0.4;
 }
 
 .cube:nth-child(2n) {
-  border-color: #0099ff;
+  border-color: #22d3ee;
 }
+
 .cube:nth-child(2) {
   animation-delay: 2s;
   left: 25vw;
   top: 40vh;
 }
+
 .cube:nth-child(3) {
   animation-delay: 4s;
   left: 75vw;
   top: 50vh;
 }
+
 .cube:nth-child(4) {
   animation-delay: 6s;
   left: 90vw;
   top: 10vh;
 }
+
 .cube:nth-child(5) {
   animation-delay: 8s;
   left: 10vw;
   top: 85vh;
 }
+
 .cube:nth-child(6) {
   animation-delay: 10s;
   left: 50vw;
@@ -67,10 +72,28 @@
 @keyframes cube {
   from {
     transform: scale(0) rotate(0deg) translate(-50%, -50%);
-    opacity: 1;
+    opacity: 0.6;
   }
   to {
-    transform: scale(20) rotate(960deg) translate(-50%, -50%);
+    transform: scale(25) rotate(960deg) translate(-50%, -50%);
     opacity: 0;
   }
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.8);
 }
