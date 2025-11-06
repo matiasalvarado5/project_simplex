@@ -433,15 +433,10 @@ function showResult(res) {
         content.appendChild(table);
 
     } else {
-        // --- Parte 3: El JSON (El problema original) ---
         const preElement = document.createElement('pre');
         preElement.textContent = JSON.stringify(res, null, 2); // 100% seguro
         content.appendChild(preElement);
-    }
-
-    // --- ¡LA LÍNEA PELIGROSA YA NO EXISTE! ---
-    
-    // El scroll sigue funcionando
+    }    
     area.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
 }
