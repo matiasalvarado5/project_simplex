@@ -13,9 +13,9 @@ func main() {
 	// Middleware
 	router.Use(corsMiddleware())
 
-	router.Static("/static", "./static")
+	router.Static("/assets", "./frontend")
 
-	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLGlob("frontend/*")
 
 	registerRoutes(router)
 
