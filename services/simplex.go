@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"math"
 
 	"gonum.org/v1/gonum/mat"
@@ -21,9 +22,18 @@ type SimplexResult struct {
 	X      []float64
 	Value  float64
 	Status string
+	Steps  []SimplexStep `json:"Steps"`
+}
+
+// Estructura para almacenar paso a paso
+type SimplexStep struct {
+	Message string      `json:"Message"`
+	Headers []string    `json:"Headers"`
+	Tableau [][]float64 `json:"Tableau"`
 }
 
 func SolveSimplex(req SimplexRequest) (*SimplexResult, error) {
+	steps := []SimplexStep{}
 	m, n := len(req.A), len(req.A[0])
 	data := make([]float64, 0, m*n)
 	for i := 0; i < m; i++ {
@@ -53,6 +63,18 @@ func SolveSimplex(req SimplexRequest) (*SimplexResult, error) {
 		}
 	}
 	totalVars := n + numSlack + numArtificial
+
+	headers := []string{}
+	for i := 1; i <= n; i++ {
+		headers = append(headers, fmt.Sprintf("x%d", i))
+	}
+	for i := 1; i <= numSlack; i++ {
+		headers = append(headers, fmt.Sprintf("s%d", i))
+	}
+	for i := 1; i <= numArtificial; i++ {
+		headers = append(headers, fmt.Sprintf("a%d", i))
+	}
+	headers = append(headers, "RHS")
 
 	// Tableau inicial
 	tableau := mat.NewDense(m+1, totalVars+1, nil)
@@ -102,7 +124,7 @@ func SolveSimplex(req SimplexRequest) (*SimplexResult, error) {
 
 	// Problema auxiliar en caso de que hayan variables auxiliares
 	if len(artificialCols) > 0 {
-		if err := phaseOne(tableau, m, totalVars, basicVars, artificialCols); err != nil {
+		if err := phaseOne(tableau, m, totalVars, basicVars, artificialCols, headers, &steps); err != nil {
 			return nil, err
 		}
 		tableau = removeCols(tableau, artificialCols)
@@ -148,7 +170,7 @@ func SolveSimplex(req SimplexRequest) (*SimplexResult, error) {
 		}
 	}
 
-	if err := simplexCore(tableau, m, totalVars, basicVars); err != nil {
+	if err := simplexCore(tableau, m, totalVars, basicVars, headers, &steps); err != nil {
 		return nil, err
 	}
 
@@ -167,15 +189,15 @@ func SolveSimplex(req SimplexRequest) (*SimplexResult, error) {
 	if !req.Maximize {
 		opt = -opt // Invertimos signo si era minimizacion
 	}
-
 	return &SimplexResult{
 		X:      solution,
 		Value:  opt,
 		Status: "Optimo",
+		Steps:  steps,
 	}, nil
 }
 
-func phaseOne(tableau *mat.Dense, m, totalVars int, basicVars []int, artificialCols []int) error {
+func phaseOne(tableau *mat.Dense, m, totalVars int, basicVars []int, artificialCols []int, headers []string, steps *[]SimplexStep) error {
 	phase := mat.DenseCopyOf(tableau)
 
 	for _, a := range artificialCols {
@@ -190,12 +212,14 @@ func phaseOne(tableau *mat.Dense, m, totalVars int, basicVars []int, artificialC
 		}
 	}
 
-	if err := simplexCore(phase, m, totalVars, basicVars); err != nil {
+	addTableauStep(phase, m, totalVars, "Fase 1 - Tableau inicial", headers, steps)
+
+	if err := simplexCore(phase, m, totalVars, basicVars, headers, steps); err != nil {
 		return err
 	}
 
 	if math.Abs(phase.At(m, totalVars)) > 1e-6 {
-		return errors.New("problema infactible (fase1 no pudo anular artificiales)")
+		return errors.New("problema infactible")
 	}
 
 	*tableau = *phase
@@ -203,7 +227,9 @@ func phaseOne(tableau *mat.Dense, m, totalVars int, basicVars []int, artificialC
 }
 
 // Pivotes hasta la optimabilidad
-func simplexCore(tableau *mat.Dense, m, totalVars int, basicVars []int) error {
+func simplexCore(tableau *mat.Dense, m, totalVars int, basicVars []int, headers []string, steps *[]SimplexStep) error {
+	iter := 1
+	addTableauStep(tableau, m, totalVars, "Tableau inicial", headers, steps)
 	for {
 		col := -1
 		minValue := 0.0
@@ -214,6 +240,7 @@ func simplexCore(tableau *mat.Dense, m, totalVars int, basicVars []int) error {
 			}
 		}
 		if col == -1 {
+			addTableauStep(tableau, m, totalVars, "Solucion optima alcanzada", headers, steps)
 			break // solucion optima
 		}
 
@@ -232,6 +259,9 @@ func simplexCore(tableau *mat.Dense, m, totalVars int, basicVars []int) error {
 			return errors.New("Problema no acotado")
 		}
 		pivotWithBasis(tableau, row, col, basicVars)
+		msg := fmt.Sprintf("Iteracion %d", iter)
+		addTableauStep(tableau, m, totalVars, msg, headers, steps)
+		iter++
 	}
 	return nil
 }
@@ -326,4 +356,22 @@ func containsInt(a []int, v int) bool {
 		}
 	}
 	return false
+}
+
+func addTableauStep(tableau *mat.Dense, m, totalVars int, message string, headers []string, steps *[]SimplexStep) {
+	rows := m + 1
+	cols := totalVars + 1
+	stepData := make([][]float64, rows)
+	for i := 0; i < rows; i++ {
+		row := make([]float64, cols)
+		for j := 0; j < cols; j++ {
+			row[j] = tableau.At(i, j)
+		}
+		stepData[i] = row
+	}
+	*steps = append(*steps, SimplexStep{
+		Message: message,
+		Headers: headers,
+		Tableau: stepData,
+	})
 }
