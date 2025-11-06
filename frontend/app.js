@@ -398,31 +398,31 @@ function showResult(res) {
         // --- Parte 1: El Título ---
         const title = document.createElement('h4');
         title.style = "color: var(--accent-light); margin-top: 1.5rem; margin-bottom: 1rem;";
-        // Usamos innerHTML solo para el ícono (es seguro, es texto estático tuyo)
-        title.innerHTML = '<i class="fas fa-table"></i> Valores de las Variables:';
+        title.innerHTML = '<i class="fas fa-table"></i> Valores de las Variables:'; // Seguro (es texto estático)
         content.appendChild(title);
 
         // --- Parte 2: La Tabla ---
         const table = document.createElement('table');
         table.className = 'result-table';
         
-        // Cabecera (seguro, texto estático)
         const thead = document.createElement('thead');
-        thead.innerHTML = '<tr><th>Variable</th><th>Valor</th></tr>';
+        thead.innerHTML = '<tr><th>Variable</th><th>Valor</th></tr>'; // Seguro (texto estático)
         table.appendChild(thead);
         
-        // Cuerpo de la tabla
         const tbody = document.createElement('tbody');
         res.X.forEach((v, i) => {
             const tr = document.createElement('tr');
             
-            // Celda 1 (Variable)
+            // Celda 1 (Variable) - CAMBIO CLAVE
             const tdVar = document.createElement('td');
-            tdVar.innerHTML = `<strong>x${i + 1}</strong>`; // Seguro
+            // Vamos a usar .textContent aquí también para estar 100% seguros
+            tdVar.textContent = `x${i + 1}`; 
+            // Y luego añadimos el <strong>
+            tdVar.innerHTML = `<strong>${tdVar.textContent}</strong>`; // Sigue siendo seguro
             
-            // Celda 2 (Valor) - usamos .textContent (la más segura)
+            // Celda 2 (Valor)
             const tdVal = document.createElement('td');
-            tdVal.textContent = Number(v).toPrecision(4); // Seguro
+            tdVal.textContent = Number(v).toPrecision(4); // 100% seguro
             
             tr.appendChild(tdVar);
             tr.appendChild(tdVal);
@@ -430,22 +430,23 @@ function showResult(res) {
         });
         table.appendChild(tbody);
         
-        // Añadimos la tabla completa al 'content'
         content.appendChild(table);
 
     } else {
         // --- Parte 3: El JSON (El problema original) ---
-        // Creamos el <pre> y le asignamos el JSON como TEXTO plano.
         const preElement = document.createElement('pre');
         preElement.textContent = JSON.stringify(res, null, 2); // 100% seguro
-        
-        // Añadimos el <pre> al 'content'
         content.appendChild(preElement);
     }
 
-  content.innerHTML = parts.join('');
-  area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // --- ¡LA LÍNEA PELIGROSA YA NO EXISTE! ---
+    
+    // El scroll sigue funcionando
+    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
 }
+
+
 
 function generatePDF() {
     console.log(currentResult.Steps[0].Headers);
