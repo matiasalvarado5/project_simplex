@@ -391,24 +391,57 @@ function showResult(res) {
     parts.push(`<div class="result-info"><p><strong>Valor Óptimo (Z):</strong> <span style="color: var(--accent-light); font-size: 1.3rem; font-weight: 700;">${Number(res.Value).toPrecision(4)}</span></p></div>`);
   }
 
-  if (res.X && Array.isArray(res.X)) {
-    parts.push('<h4 style="color: var(--accent-light); margin-top: 1.5rem; margin-bottom: 1rem;"><i class="fas fa-table"></i> Valores de las Variables:</h4>');
-    parts.push('<table class="result-table"><thead><tr><th>Variable</th><th>Valor</th></tr></thead><tbody>');
-    res.X.forEach((v, i) => {
-      parts.push(`<tr><td><strong>x${i + 1}</strong></td><td>${Number(v).toPrecision(4)}</td></tr>`);
-    });
-    parts.push('</tbody></table>');
-  } else {
-    // 1. Creamos un elemento <pre> en memoria
-    const preElement = document.createElement('pre');
+// 1. Primero, limpia el contenido anterior
+    content.innerHTML = ''; 
 
-    // 2. Asignamos el JSON como TEXTO PLANO (la forma segura).
-    //    El navegador no ejecutará esto como código.
-    preElement.textContent = JSON.stringify(res, null, 2);
+    if (res.X && Array.isArray(res.X)) {
+        // --- Parte 1: El Título ---
+        const title = document.createElement('h4');
+        title.style = "color: var(--accent-light); margin-top: 1.5rem; margin-bottom: 1rem;";
+        // Usamos innerHTML solo para el ícono (es seguro, es texto estático tuyo)
+        title.innerHTML = '<i class="fas fa-table"></i> Valores de las Variables:';
+        content.appendChild(title);
 
-    // 3. Añadimos el string HTML ya sanitizado al array
-    parts.push(preElement.outerHTML);
-  }
+        // --- Parte 2: La Tabla ---
+        const table = document.createElement('table');
+        table.className = 'result-table';
+        
+        // Cabecera (seguro, texto estático)
+        const thead = document.createElement('thead');
+        thead.innerHTML = '<tr><th>Variable</th><th>Valor</th></tr>';
+        table.appendChild(thead);
+        
+        // Cuerpo de la tabla
+        const tbody = document.createElement('tbody');
+        res.X.forEach((v, i) => {
+            const tr = document.createElement('tr');
+            
+            // Celda 1 (Variable)
+            const tdVar = document.createElement('td');
+            tdVar.innerHTML = `<strong>x${i + 1}</strong>`; // Seguro
+            
+            // Celda 2 (Valor) - usamos .textContent (la más segura)
+            const tdVal = document.createElement('td');
+            tdVal.textContent = Number(v).toPrecision(4); // Seguro
+            
+            tr.appendChild(tdVar);
+            tr.appendChild(tdVal);
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        
+        // Añadimos la tabla completa al 'content'
+        content.appendChild(table);
+
+    } else {
+        // --- Parte 3: El JSON (El problema original) ---
+        // Creamos el <pre> y le asignamos el JSON como TEXTO plano.
+        const preElement = document.createElement('pre');
+        preElement.textContent = JSON.stringify(res, null, 2); // 100% seguro
+        
+        // Añadimos el <pre> al 'content'
+        content.appendChild(preElement);
+    }
 
   content.innerHTML = parts.join('');
   area.scrollIntoView({ behavior: 'smooth', block: 'start' });
