@@ -399,7 +399,15 @@ function showResult(res) {
     });
     parts.push('</tbody></table>');
   } else {
-    parts.push('<pre>' + JSON.stringify(res, null, 2) + '</pre>');
+    // 1. Creamos un elemento <pre> en memoria
+    const preElement = document.createElement('pre');
+
+    // 2. Asignamos el JSON como TEXTO PLANO (la forma segura).
+    //    El navegador no ejecutará esto como código.
+    preElement.textContent = JSON.stringify(res, null, 2);
+
+    // 3. Añadimos el string HTML ya sanitizado al array
+    parts.push(preElement.outerHTML);
   }
 
   content.innerHTML = parts.join('');
