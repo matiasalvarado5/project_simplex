@@ -3,12 +3,16 @@
 /obj/
 *.exe
 *.test
+*.bin
+
 
 # Go modules
 vendor/
 
 # VSCode
 .vscode/
+
+resultados.html
 
 # Otros
 *.log
