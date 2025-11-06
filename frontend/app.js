@@ -413,12 +413,11 @@ function showResult(res) {
         res.X.forEach((v, i) => {
             const tr = document.createElement('tr');
             
-            // Celda 1 (Variable) - CAMBIO CLAVE
+            // Celda 1 (Variable) - CORRECCIÓN DEFINITIVA
             const tdVar = document.createElement('td');
-            // Vamos a usar .textContent aquí también para estar 100% seguros
-            tdVar.textContent = `x${i + 1}`; 
-            // Y luego añadimos el <strong>
-            tdVar.innerHTML = `<strong>${tdVar.textContent}</strong>`; // Sigue siendo seguro
+            const strongElement = document.createElement('strong');
+            strongElement.textContent = `x${i + 1}`;
+            tdVar.appendChild(strongElement);
             
             // Celda 2 (Valor)
             const tdVal = document.createElement('td');
