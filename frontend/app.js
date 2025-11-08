@@ -393,7 +393,7 @@ function showResult(res) {
 
 // 1. Primero, limpia el contenido anterior
     content.innerHTML = ''; 
-
+    content.innerHTML = parts.join('');
     if (res.X && Array.isArray(res.X)) {
         // --- Parte 1: El Título ---
         const title = document.createElement('h4');
