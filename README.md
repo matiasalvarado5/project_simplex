@@ -8,7 +8,10 @@ El objetivo es brindar una herramienta intuitiva para que usuarios no expertos p
 ## Tecnologías
 - *Lenguaje:* Go (Golang)  
 - *Framework Web:* Gin
-- *Base de datos:* PostgreSQL (para almacenamiento de problemas y resultados) (en revisión)
+- *Testing:* Vegeta y K6 (Pruebas de carga)
+- *Generacion de pdf:* JS PDF
+- *Deploy:* Render
+- *Análisis de vulnerabilidades:* Snyk
 - *Frontend:* HTML, CSS, JavaScript (interfaz básica e intuitiva)  
 
 ---
