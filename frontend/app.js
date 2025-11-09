@@ -378,65 +378,98 @@ async function submitForm() {
 }
 
 function showResult(res) {
-  const area = document.getElementById('resultArea');
-  const content = document.getElementById('resultContent');
-  area.style.display = 'block';
-  const parts = [];
-
-  if (res.Status) {
-    parts.push(`<div class="result-info"><p><strong>Estado:</strong> <span style="color: var(--success-light);">${res.Status}</span></p></div>`);
-  }
-
-  if (res.Value !== undefined) {
-    parts.push(`<div class="result-info"><p><strong>Valor Óptimo (Z):</strong> <span style="color: var(--accent-light); font-size: 1.3rem; font-weight: 700;">${Number(res.Value).toPrecision(4)}</span></p></div>`);
-  }
+  const area = document.getElementById('resultArea');
+  const content = document.getElementById('resultContent');
+  area.style.display = 'block';
+  // const parts = []; // <-- ELIMINAMOS EL ARRAY 'parts'
 
 // 1. Primero, limpia el contenido anterior
-    content.innerHTML = ''; 
-    content.innerHTML = parts.join('');
-    if (res.X && Array.isArray(res.X)) {
-        // --- Parte 1: El Título ---
-        const title = document.createElement('h4');
-        title.style = "color: var(--accent-light); margin-top: 1.5rem; margin-bottom: 1rem;";
-        title.innerHTML = '<i class="fas fa-table"></i> Valores de las Variables:'; // Seguro (es texto estático)
-        content.appendChild(title);
+    content.innerHTML = ''; 
 
-        // --- Parte 2: La Tabla ---
-        const table = document.createElement('table');
-        table.className = 'result-table';
-        
-        const thead = document.createElement('thead');
-        thead.innerHTML = '<tr><th>Variable</th><th>Valor</th></tr>'; // Seguro (texto estático)
-        table.appendChild(thead);
-        
-        const tbody = document.createElement('tbody');
-        res.X.forEach((v, i) => {
-            const tr = document.createElement('tr');
-            
-            // Celda 1 (Variable) - CORRECCIÓN DEFINITIVA
-            const tdVar = document.createElement('td');
-            const strongElement = document.createElement('strong');
-            strongElement.textContent = `x${i + 1}`;
-            tdVar.appendChild(strongElement);
-            
-            // Celda 2 (Valor)
-            const tdVal = document.createElement('td');
-            tdVal.textContent = Number(v).toPrecision(4); // 100% seguro
-            
-            tr.appendChild(tdVar);
-            tr.appendChild(tdVal);
-            tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
-        
-        content.appendChild(table);
+  if (res.Status) {
+    // --- INICIO CORRECCIÓN ---
+    // Creamos los elementos de forma segura en lugar de usar parts.push()
+    const statusDiv = document.createElement('div');
+    statusDiv.className = 'result-info';
+    
+    const statusP = document.createElement('p');
+    statusP.innerHTML = '<strong>Estado:</strong> '; // Esto es seguro (es tu propio texto)
+    
+    const statusSpan = document.createElement('span');
+    statusSpan.style = "color: var(--success-light);";
+    statusSpan.textContent = res.Status; // <-- ¡LA FORMA SEGURA! Inserta datos como texto
+    
+    statusP.appendChild(statusSpan);
+    statusDiv.appendChild(statusP);
+    content.appendChild(statusDiv); // <-- Lo añadimos de forma segura al DOM
+    // --- FIN CORRECCIÓN ---
+  }
 
-    } else {
-        const preElement = document.createElement('pre');
-        preElement.textContent = JSON.stringify(res, null, 2); // 100% seguro
-        content.appendChild(preElement);
-    }    
-    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (res.Value !== undefined) {
+    // --- INICIO CORRECCIÓN ---
+    // Repetimos el mismo patrón seguro para el Valor
+    const valueDiv = document.createElement('div');
+    valueDiv.className = 'result-info';
+    
+    const valueP = document.createElement('p');
+    valueP.innerHTML = '<strong>Valor Óptimo (Z):</strong> '; // Seguro
+    
+    const valueSpan = document.createElement('span');
+    valueSpan.style = "color: var(--accent-light); font-size: 1.3rem; font-weight: 700;";
+    valueSpan.textContent = Number(res.Value).toPrecision(4); // Seguro
+    
+    valueP.appendChild(valueSpan);
+    valueDiv.appendChild(valueP);
+    content.appendChild(valueDiv); // <-- Lo añadimos de forma segura al DOM
+    // --- FIN CORRECCIÓN ---
+  }
+
+  // content.innerHTML = parts.join(''); // <-- LÍNEA PELIGROSA ELIMINADA
+
+  // El resto de tu código ya era seguro y funciona perfecto
+    if (res.X && Array.isArray(res.X)) {
+        // --- Parte 1: El Título ---
+        const title = document.createElement('h4');
+        title.style = "color: var(--accent-light); margin-top: 1.5rem; margin-bottom: 1rem;";
+        title.innerHTML = '<i class="fas fa-table"></i> Valores de las Variables:'; // Seguro (es texto estático)
+        content.appendChild(title);
+
+        // --- Parte 2: La Tabla ---
+        const table = document.createElement('table');
+        table.className = 'result-table';
+        
+        const thead = document.createElement('thead');
+        thead.innerHTML = '<tr><th>Variable</th><th>Valor</th></tr>'; // Seguro (es texto estático)
+        table.appendChild(thead);
+        
+        const tbody = document.createElement('tbody');
+        res.X.forEach((v, i) => {
+            const tr = document.createElement('tr');
+            
+            // Celda 1 (Variable) - CORRECCIÓN DEFINITIVA
+            const tdVar = document.createElement('td');
+            const strongElement = document.createElement('strong');
+            strongElement.textContent = `x${i + 1}`;
+            tdVar.appendChild(strongElement);
+            
+            // Celda 2 (Valor)
+            const tdVal = document.createElement('td');
+            tdVal.textContent = Number(v).toPrecision(4); // 100% seguro
+            
+            tr.appendChild(tdVar);
+            tr.appendChild(tdVal);
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        
+        content.appendChild(table);
+
+    } else {
+        const preElement = document.createElement('pre');
+        preElement.textContent = JSON.stringify(res, null, 2); // 100% seguro
+        content.appendChild(preElement);
+    }    
+    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
 }
 
